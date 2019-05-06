@@ -14,11 +14,13 @@ if [ $os_name == "Darwin" ]; then
   fi
 fi
 
-if [ $os_name == "Debian" ]; then
-  echo "Debian"
-  $packages_outdated=`apt list --upgradable | sed s/]/''/g |  awk '!/List/ {print $1, $2, $6}'`
-  if [ ${#packages_outdated}==0 ]; then
-    echo "No updates available."
+if [ $os_name == "Linux" ]; then
+  command -v apt >/dev/null 2>&1 || { is_apt_available=true }
+  if [ $is_apt_available ]; then
+    $packages_outdated=`apt list --upgradable | sed s/]/''/g |  awk '!/List/ {print $1, $2, $6}'`
+    if [ ${#packages_outdated}==0 ]; then
+      echo "No updates available."
+    fi
   fi
 fi
 
