@@ -15,7 +15,7 @@ if [ $os_name == "Darwin" ]; then
 fi
 
 if [ $os_name == "Linux" ]; then
-  command -v apt >/dev/null 2>&1 || { is_apt_available=true }
+  command -v apt >/dev/null 2>&1 && is_apt_available=true || { echo "apt is not available"; exit 1; }
   if [ $is_apt_available ]; then
     $packages_outdated=`apt list --upgradable | sed s/]/''/g |  awk '!/List/ {print $1, $2, $6}'`
     if [ ${#packages_outdated}==0 ]; then
