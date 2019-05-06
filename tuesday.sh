@@ -21,7 +21,14 @@ if [ $os_name == "Darwin" ]; then
 fi
 
 if [ $os_name == "Linux" ]; then
-  command -v apt >/dev/null 2>&1 && is_apt_available=true || { echo "apt is not available"; exit 1; }
+  command -v apt >/dev/null 2>&1 && is_apt_available=true || { echo "apt is not available"; }
+  command -v yum >/dev/null 2>&1 && is_yum_available=true || { echo "yum is not available"; }
+  
+  # if [[ ! $is_apt_available && ! $is_yum_available ]]; then
+  #   echo "No supported package manager found [apt, yum]"
+  #   exit 1
+  # fi
+
   if [ $is_apt_available ]; then
     package_manager="apt"
     packages_outdated=`apt list --upgradable | sed s/]/''/g | awk '!/List/ {print $1, $2, $6}' | paste -d, -s -`
@@ -30,6 +37,17 @@ if [ $os_name == "Linux" ]; then
     else
       echo $packages_outdated
       msg = $packages_outdated    
+    fi
+  fi
+  
+  if [ $is_yum_available ]; then
+    package_manager="yum"
+    packages_outdated=`yum check-update -q | awk '!/^$/ {print $1, $2}' | paste -d, -s -`
+    if [ ${#packages_outdated}==0 ]; then
+      echo "No updates available."
+    else
+      echo $packages_outdated
+      msg = $packages_outdated
     fi
   fi
 fi
