@@ -1,6 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 TUESDAY_SERVER=${TUESDAY_SERVER:-localhost:3000}
+PROTOCOL=http
 AGENT_VERSION=0.0.1
 host_details=$(uname -a)
 os_name=$(uname -s)
@@ -23,7 +24,11 @@ if [[ $os_name == Darwin ]]; then
 fi
 
 if [[ $os_name == Linux ]]; then
-  command -v apt >/dev/null && is_apt_available=true ||
+  command -v apk >/dev/null &&
+    is_apk_available=true ||
+    { echo "apk is not available"; }
+  command -v apt >/dev/null && 
+    is_apt_available=true ||
     { echo "apt is not available"; }
   command -v yum >/dev/null &&
     is_yum_available=true ||
@@ -33,6 +38,23 @@ if [[ $os_name == Linux ]]; then
   #   echo "No supported package manager found [apt, yum]"
   #   exit 1
   # fi
+
+  if [[ $is_apk_available ]]; then
+    package_manager=apk
+    packages_outdated=$(
+      apk list --upgradable |
+        sed s/]/''/g |
+        sed s/}\ .?from:\ /''/g |
+        awk '!/List/ {print $1, $3, $7}' |
+        paste -d, -s -
+    )
+    if [[ -z $packages_outdated ]]; then
+      echo "No updates available."
+    else
+      echo "$packages_outdated"
+      msg=$packages_outdated
+    fi
+  fi
 
   if [[ $is_apt_available ]]; then
     package_manager=apt
@@ -66,5 +88,5 @@ if [[ $os_name == Linux ]]; then
   fi
 fi
 params="host=$host_details&v=$AGENT_VERSION&time=$now&pkgmgr=$package_manager&msg=$packages_outdated"
-echo $params
-curl -XPOST -d $params $TUESDAY_SERVER/api
+echo "$params"
+curl -XPOST -d "$params" $PROTOCOL://$TUESDAY_SERVER/api
