@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 TUESDAY_SERVER=${TUESDAY_SERVER:-localhost:3000}
 PROTOCOL=http
