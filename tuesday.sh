@@ -3,6 +3,7 @@
 TUESDAY_SERVER=${TUESDAY_SERVER:-localhost:3000}
 PROTOCOL=http
 AGENT_VERSION=0.0.1
+TOKEN=foo
 host_details=$(uname -a)
 os_name=$(uname -s)
 msg=''
@@ -89,4 +90,4 @@ if [[ $os_name == Linux ]]; then
 fi
 params="host=$host_details&v=$AGENT_VERSION&time=$now&pkgmgr=$package_manager&msg=$packages_outdated"
 echo "$params"
-curl -XPOST -d "$params" $PROTOCOL://$TUESDAY_SERVER/api
+curl -XPOST -d "$params" $PROTOCOL://$TUESDAY_SERVER/ping/$TOKEN
